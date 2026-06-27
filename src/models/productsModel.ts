@@ -9,7 +9,8 @@ const productSchema = new Schema<Product>({
     imageUrl: { type: String, required: true },
     category: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },    
+    updatedAt: { type: Date, default: Date.now },
+    
 },
     { timestamps: true, versionKey: false }
 );

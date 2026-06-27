@@ -3,6 +3,7 @@ import type { Cart } from "./cart.js";
 
 const cartSchema = new Schema({
     userId: { type: Types.ObjectId, ref: "User", required: true },
+    cartId: { type: String, required: true },
     products: [{
         productId: { type: Types.ObjectId, ref: "Product", required: true },
         quantity: { type: Number, required: true },
