@@ -2,49 +2,50 @@ import { getSupabaseAdmin } from "./supabase.service.js";
 
 // ==================== CART ====================
 
-export const createCart = async (userId: number) => {
+export const createCart = async (userId: string) => {
     const { data, error } = await getSupabaseAdmin()
         .from("cart")
         .insert({ user_id: userId })
         .select()
         .single();
     if (error) throw error;
-    return data;
+    return `Carrito ${data} creado correctamente`;
 };
 
-export const getCartById = async (cartId: number) => {
+export const getCartById = async (cartId: string) => {
     const { data, error } = await getSupabaseAdmin()
         .from("cart")
         .select("*")
         .eq("id", cartId)
         .single();
     if (error) throw error;
-    return data;
+    return `Carrito ${data} encontrado correctamente`;
 };
 
-export const getCartByUserId = async (userId: number) => {
+export const getCartByUserId = async (userId: string) => {
     const { data, error } = await getSupabaseAdmin()
         .from("cart")
         .select("*, cart_items(*)")
         .eq("user_id", userId)
         .single();
     if (error) throw error;
-    return data;
+    return `Carrito ${data} encontrado correctamente`;
 };
 
-export const deleteCart = async (cartId: number) => {
+export const deleteCart = async (cartId: string) => {
     const { error } = await getSupabaseAdmin()
         .from("cart")
         .delete()
         .eq("id", cartId);
     if (error) throw error;
+    return `Carrito ${cartId} eliminado correctamente`;
 };
 
 // ==================== CART ITEMS ====================
 
 export const addItemToCart = async (itemData: {
-    cart_id: number;
-    product_id: number;
+    cart_id: string;
+    product_id: string;
     quantity: number;
 }) => {
     const { data, error } = await getSupabaseAdmin()
@@ -53,19 +54,19 @@ export const addItemToCart = async (itemData: {
         .select()
         .single();
     if (error) throw error;
-    return data;
+    return `Carrito items ${data} obtenidos correctamente`;
 };
 
-export const getCartItems = async (cartId: number) => {
+export const getCartItems = async (cartId: string) => {
     const { data, error } = await getSupabaseAdmin()
         .from("cart_items")
         .select("*")
         .eq("cart_id", cartId);
     if (error) throw error;
-    return data;
+    return `Carrito items ${data} obtenidos correctamente`;
 };
 
-export const updateCartItemQuantity = async (itemId: number, quantity: number) => {
+export const updateCartItemQuantity = async (itemId: string, quantity: number) => {
     const { data, error } = await getSupabaseAdmin()
         .from("cart_items")
         .update({ quantity })
@@ -73,21 +74,23 @@ export const updateCartItemQuantity = async (itemId: number, quantity: number) =
         .select()
         .single();
     if (error) throw error;
-    return data;
+    return `Carrito items ${data} actualizados correctamente`;
 };
 
-export const removeItemFromCart = async (itemId: number) => {
+export const removeItemFromCart = async (itemId: string) => {
     const { error } = await getSupabaseAdmin()
         .from("cart_items")
         .delete()
         .eq("id", itemId);
     if (error) throw error;
+    return `Carrito items ${itemId} eliminados correctamente`;
 };
 
-export const clearCart = async (cartId: number) => {
+export const clearCart = async (cartId: string) => {
     const { error } = await getSupabaseAdmin()
         .from("cart_items")
         .delete()
         .eq("cart_id", cartId);
     if (error) throw error;
+    return `Carrito items ${cartId} eliminados correctamente`;
 };

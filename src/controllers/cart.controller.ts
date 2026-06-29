@@ -31,11 +31,15 @@ export const createCartController = async (req: Request, res: Response) => {
     }
 };
 
-export const getCartByIdController = async (req: Request, res: Response) => {
+export const getCartByIdController = async (req: Request<{ id: string }>, res: Response) => {
     const { id } = req.params;
 
+    if (!id) {
+        return res.status(400).json({ error: "El ID del carrito es requerido" });
+    }
+
     try {
-        const cart = await getCartById(Number(id));
+        const cart = await getCartById(id);
         return res.json(cart);
     } catch (error: any) {
         if (error.code === "PGRST116") {
@@ -45,11 +49,15 @@ export const getCartByIdController = async (req: Request, res: Response) => {
     }
 };
 
-export const getCartByUserIdController = async (req: Request, res: Response) => {
+export const getCartByUserIdController = async (req: Request<{ userId: string }>, res: Response) => {
     const { userId } = req.params;
 
+    if (!userId) {
+        return res.status(400).json({ error: "El ID del usuario es requerido" });
+    }
+
     try {
-        const cart = await getCartByUserId(Number(userId));
+        const cart = await getCartByUserId(userId);
         return res.json(cart);
     } catch (error: any) {
         if (error.code === "PGRST116") {
@@ -59,11 +67,15 @@ export const getCartByUserIdController = async (req: Request, res: Response) => 
     }
 };
 
-export const deleteCartController = async (req: Request, res: Response) => {
+export const deleteCartController = async (req: Request<{ id: string }>, res: Response) => {
     const { id } = req.params;
 
+    if (!id) {
+        return res.status(400).json({ error: "El ID del carrito es requerido" });
+    }
+
     try {
-        await deleteCart(Number(id));
+        await deleteCart(id);
         return res.json({ message: "Carrito eliminado correctamente" });
     } catch (error: any) {
         return res.status(500).json({ error: error.message || "Error al eliminar el carrito" });
@@ -72,9 +84,13 @@ export const deleteCartController = async (req: Request, res: Response) => {
 
 // ==================== CART ITEMS ====================
 
-export const addItemController = async (req: Request, res: Response) => {
+export const addItemController = async (req: Request<{ cartId: string }>, res: Response) => {
     const { cartId } = req.params;
     const { productId, quantity } = req.body;
+
+    if (!cartId) {
+        return res.status(400).json({ error: "El ID del carrito es requerido" });
+    }
 
     if (!productId || quantity === undefined) {
         return res.status(400).json({ error: "productId y quantity son requeridos" });
@@ -86,7 +102,7 @@ export const addItemController = async (req: Request, res: Response) => {
 
     try {
         const item = await addItemToCart({
-            cart_id: Number(cartId),
+            cart_id: cartId,
             product_id: productId,
             quantity
         });
@@ -99,20 +115,28 @@ export const addItemController = async (req: Request, res: Response) => {
     }
 };
 
-export const getCartItemsController = async (req: Request, res: Response) => {
+export const getCartItemsController = async (req: Request<{ cartId: string }>, res: Response) => {
     const { cartId } = req.params;
 
+    if (!cartId) {
+        return res.status(400).json({ error: "El ID del carrito es requerido" });
+    }
+
     try {
-        const items = await getCartItems(Number(cartId));
+        const items = await getCartItems(cartId);
         return res.json(items);
     } catch (error: any) {
         return res.status(500).json({ error: error.message || "Error al obtener items" });
     }
 };
 
-export const updateItemQuantityController = async (req: Request, res: Response) => {
+export const updateItemQuantityController = async (req: Request<{ itemId: string }>, res: Response) => {
     const { itemId } = req.params;
     const { quantity } = req.body;
+
+    if (!itemId) {
+        return res.status(400).json({ error: "El ID del item es requerido" });
+    }
 
     if (quantity === undefined) {
         return res.status(400).json({ error: "quantity es requerido" });
@@ -123,7 +147,7 @@ export const updateItemQuantityController = async (req: Request, res: Response) 
     }
 
     try {
-        const item = await updateCartItemQuantity(Number(itemId), quantity);
+        const item = await updateCartItemQuantity(itemId, quantity);
         return res.json(item);
     } catch (error: any) {
         if (error.code === "PGRST116") {
@@ -133,22 +157,30 @@ export const updateItemQuantityController = async (req: Request, res: Response) 
     }
 };
 
-export const removeItemController = async (req: Request, res: Response) => {
+export const removeItemController = async (req: Request<{ itemId: string }>, res: Response) => {
     const { itemId } = req.params;
 
+    if (!itemId) {
+        return res.status(400).json({ error: "El ID del item es requerido" });
+    }
+
     try {
-        await removeItemFromCart(Number(itemId));
+        await removeItemFromCart(itemId);
         return res.json({ message: "Item eliminado correctamente" });
     } catch (error: any) {
         return res.status(500).json({ error: error.message || "Error al eliminar item" });
     }
 };
 
-export const clearCartController = async (req: Request, res: Response) => {
+export const clearCartController = async (req: Request<{ cartId: string }>, res: Response) => {
     const { cartId } = req.params;
 
+    if (!cartId) {
+        return res.status(400).json({ error: "El ID del carrito es requerido" });
+    }
+
     try {
-        await clearCart(Number(cartId));
+        await clearCart(cartId);
         return res.json({ message: "Carrito vaciado correctamente" });
     } catch (error: any) {
         return res.status(500).json({ error: error.message || "Error al vaciar carrito" });

@@ -12,11 +12,13 @@ export const getAllUsers = async (_req: Request, res: Response) => {
 
 export const getUserById = async (req: Request, res: Response) => {
     const { id } = req.params
-
+    if (!id) {
+        return res.status(400).json({ error: "El ID del usuario es requerido" });
+    }
     const { data, error } = await getSupabaseAdmin()
         .from("users")
         .select("*")
-        .eq("id", Number(id))
+        .eq("id", id as string)
         .single()
 
     if (error) {
@@ -50,10 +52,14 @@ export const updateUser = async (req: Request, res: Response) => {
     const { id } = req.params
     const { email, name, password, role } = req.body
 
+    if (!email || !name || !password || !role) {
+        return res.status(400).json({ error: "Todos los campos son requeridos" });
+    }
+
     const { data, error } = await getSupabaseAdmin()
         .from("users")
         .update({ email, name, password, role })
-        .eq("id", Number(id))
+        .eq("id", id as string)
         .select()
         .single()
 
@@ -66,11 +72,13 @@ export const updateUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
     const { id } = req.params
-
+    if (!id) {
+        return res.status(400).json({ error: "El ID del usuario es requerido" });
+    }
     const { error } = await getSupabaseAdmin()
         .from("users")
         .delete()
-        .eq("id", Number(id))
+        .eq("id", id as string)
 
     if (error) {
         return res.status(500).json({ error: error.message })

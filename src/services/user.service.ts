@@ -16,7 +16,7 @@ export const createUser = async (userData: TablesInsert<"users">) => {
     return `Usuario ${userData.name} creado correctamente`;
 };
 
-export const updateUser = async (userId: number, userData: TablesUpdate<"users">) => { 
+export const updateUser = async (userId: string, userData: TablesUpdate<"users">) => { 
     const { data, error } = await getSupabaseAdmin()
         .from("users")
         .update(userData)
@@ -26,7 +26,7 @@ export const updateUser = async (userId: number, userData: TablesUpdate<"users">
     return `Usuario ${data} actualizado correctamente`;
 }
 
-export const deleteUser = async (userId: number) => {
+export const deleteUser = async (userId: string) => {
     const { error } = await getSupabaseAdmin()
         .from("users")
         .delete()
@@ -35,7 +35,7 @@ export const deleteUser = async (userId: number) => {
     return `Usuario ${userId} eliminado correctamente`;
 };
 
-export const getUserById = async (userId: number) => {
+export const getUserById = async (userId: string) => {
     const { data, error } = await getSupabaseAdmin()
         .from("users")
         .select("*")

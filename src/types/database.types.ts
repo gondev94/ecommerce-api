@@ -14,18 +14,18 @@ export type Database = {
     Tables: {
       cart: {
         Row: {
-          id: number
-          user_id: number,
+          id: string
+          user_id: string,
           created_at: string
         }
         Insert: {
-          id?: number
-          user_id: number
+          id?: string
+          user_id: string
           created_at?: string
         }
         Update: {
-          id?: number
-          user_id?: number
+          id?: string
+          user_id?: string
           created_at?: string
         }
         Relationships: [
@@ -39,23 +39,23 @@ export type Database = {
       }
       cart_items: {
         Row: {
-          id: number
-          cart_id: number
-          product_id: number
+          id: string
+          cart_id: string
+          product_id: string
           quantity: number
           created_at: string
         }
         Insert: {
-          id?: number
-          cart_id: number
-          product_id: number
+          id?: string
+          cart_id: string
+          product_id: string
           quantity: number
           created_at?: string
         }
         Update: {
-          id?: number
-          cart_id?: number
-          product_id?: number
+          id?: string
+          cart_id?: string
+          product_id?: string
           quantity?: number
           created_at?: string
         }
@@ -70,34 +70,34 @@ export type Database = {
       }
       products: {
         Row: {
-          id: number
+          id: string
           name: string
           price: number
           stock: number
           description: string | null
-          image_url: string | null
+          imageUrl: string | null
           category: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
-          id?: number
+          id?: string
           name: string
           price: number
           stock?: number
           description?: string | null
-          image_url?: string | null
+          imageUrl?: string | null
           category?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
-          id?: number
+          id?: string
           name?: string
           price?: number
           stock?: number
           description?: string | null
-          image_url?: string | null
+          imageUrl?: string | null
           category?: string | null
           created_at?: string
           updated_at?: string
@@ -108,7 +108,7 @@ export type Database = {
         Row: {
           created_at: string
           email: string | null
-          id: number
+          id: string
           name: string | null
           password: string | null
           role: string[] | null
@@ -116,7 +116,7 @@ export type Database = {
         Insert: {
           created_at?: string
           email?: string | null
-          id?: number
+          id?: string
           name?: string | null
           password?: string | null
           role?: string[] | null
@@ -124,7 +124,7 @@ export type Database = {
         Update: {
           created_at?: string
           email?: string | null
-          id?: number
+          id?: string
           name?: string | null
           password?: string | null
           role?: string[] | null

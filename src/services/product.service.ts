@@ -9,7 +9,7 @@ export const getProducts = async () => {
     return `Lista de productos ${data}`;
 };
 
-export const getProductById = async (productId: number) => {
+export const getProductById = async (productId: string) => {
     const { data, error } = await getSupabaseAdmin()
         .from("products")
         .select("*")
@@ -29,7 +29,7 @@ export const createProduct = async (productData: TablesInsert<"products">) => {
 };
 
 export const updateProduct = async (
-    productId: number,
+    productId: string,
     productData: TablesUpdate<"products">,
 ) => {
     const { data, error } = await getSupabaseAdmin()
@@ -41,7 +41,7 @@ export const updateProduct = async (
     return `Producto ${data} actualizado correctamente`;
 };
 
-export const deleteProduct = async (productId: number) => {
+export const deleteProduct = async (productId: string) => {
     const { error } = await getSupabaseAdmin()
         .from("products")
         .delete()
