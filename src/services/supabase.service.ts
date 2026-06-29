@@ -7,8 +7,12 @@ let _supabaseAdmin: SupabaseClient<Database> | null = null
 
 export function getSupabaseAdmin() {
     if (!_supabaseAdmin) {
-        const url = process.env.SUPABASE_URL!
-        const secretKey = process.env.SUPABASE_SECRET_KEY!
+        const url = process.env.SUPABASE_URL
+        const secretKey = process.env.SUPABASE_SECRET_KEY
+        
+        if (!url || !secretKey) {
+            throw new Error('SUPABASE_URL or SUPABASE_SECRET_KEY is not set')
+        }
 
         _supabaseAdmin = createClient<Database>(url, secretKey, {
             auth: {

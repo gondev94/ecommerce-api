@@ -3,7 +3,6 @@ import { getSupabaseAdmin } from "../services/supabase.service.js"
 
 export const getAllUsers = async (_req: Request, res: Response) => {
     const { data, error } = await getSupabaseAdmin().from("users").select("*")
-
     if (error) {
         return res.status(500).json({ error: error.message })
     }
@@ -17,7 +16,7 @@ export const getUserById = async (req: Request, res: Response) => {
     const { data, error } = await getSupabaseAdmin()
         .from("users")
         .select("*")
-        .eq("id", String(id))
+        .eq("id", Number(id))
         .single()
 
     if (error) {
@@ -54,7 +53,7 @@ export const updateUser = async (req: Request, res: Response) => {
     const { data, error } = await getSupabaseAdmin()
         .from("users")
         .update({ email, name, password, role })
-        .eq("id", String(id))
+        .eq("id", Number(id))
         .select()
         .single()
 
@@ -71,7 +70,7 @@ export const deleteUser = async (req: Request, res: Response) => {
     const { error } = await getSupabaseAdmin()
         .from("users")
         .delete()
-        .eq("id", String(id))
+        .eq("id", Number(id))
 
     if (error) {
         return res.status(500).json({ error: error.message })

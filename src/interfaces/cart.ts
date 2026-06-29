@@ -1,11 +1,9 @@
-import type { Types } from "mongoose";
-
 export interface Cart {
-    _id?: Types.ObjectId;
-    userId: Types.ObjectId;
-    cartId: string;
+    _id?: number;
+    userId: number;
+    cartId: number;
     products: {
-        productId: Types.ObjectId;
+        productId: string;
         quantity: number;
         price: number;
         total: number;

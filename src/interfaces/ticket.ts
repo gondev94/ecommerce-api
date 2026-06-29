@@ -1,14 +1,13 @@
-import type { Types } from "mongoose";
 interface TicketProduct {
-    productId: Types.ObjectId;
+    productId: number;
     quantity: number;
     price: number;
     total: number;
 }
 export interface Ticket {
-    userId: Types.ObjectId;
-    ticketId: string;
-    cartId: Types.ObjectId;
+    userId: number;
+    ticketId: number;
+    cartId: number;
     products: TicketProduct[];
     totalAmount: number;
     status: "pending" | "paid" | "cancelled";
