@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "./supabase.service.js";
 import type { TablesInsert, TablesUpdate } from "../types/database.types.js";
+import { v4 as uuidv4 } from "uuid";
 
 export const getUsers = async () => {
     const { data, error } = await getSupabaseAdmin().from("users").select("*");
@@ -10,7 +11,10 @@ export const getUsers = async () => {
 export const createUser = async (userData: TablesInsert<"users">) => {
     const { data, error } = await getSupabaseAdmin()
         .from("users")
-        .insert(userData)
+        .insert({
+            id: uuidv4(),
+            ...userData
+        })
         .select();
     if (error) throw error;
     return `Usuario ${userData.name} creado correctamente`;

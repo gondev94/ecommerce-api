@@ -19,7 +19,6 @@ export const createCartController = async (req: Request, res: Response) => {
     if (!userId) {
         return res.status(400).json({ error: "userId es requerido" });
     }
-
     try {
         const cart = await createCart(userId);
         return res.status(201).json(cart);

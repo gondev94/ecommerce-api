@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "./supabase.service.js";
 import type { TablesInsert, TablesUpdate } from "../types/database.types.js";
+import { v4 as uuidv4 } from 'uuid';
 
 export const getProducts = async () => {
     const { data, error } = await getSupabaseAdmin()
@@ -22,7 +23,10 @@ export const getProductById = async (productId: string) => {
 export const createProduct = async (productData: TablesInsert<"products">) => {
     const { data, error } = await getSupabaseAdmin()
         .from("products")
-        .insert(productData)
+        .insert({
+            id: uuidv4(),
+            ...productData
+        })
         .select()
         .single();
     if (error) throw error;
@@ -78,3 +82,12 @@ export const getProductsByPriceHighToLow = async () => {
     return `Productos ordenados de mayor a menor precio encontrados correctamente`;
 }
 
+export const getProductByName = async (name: string) => {
+    const { data, error } = await getSupabaseAdmin()
+        .from("products")
+        .select("*")
+        .eq("name", name)
+        .maybeSingle();
+    if (error) throw error;
+    return data;
+}

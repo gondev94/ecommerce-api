@@ -9,27 +9,43 @@ export const createCart = async (userId: string) => {
         .select()
         .single();
     if (error) throw error;
-    return `Carrito ${data} creado correctamente`;
+    return data;
 };
 
 export const getCartById = async (cartId: string) => {
     const { data, error } = await getSupabaseAdmin()
         .from("cart")
-        .select("*")
+        .select("*, cart_items(*, products(*))")
         .eq("id", cartId)
         .single();
     if (error) throw error;
-    return `Carrito ${data} encontrado correctamente`;
+    
+    // Calcular el total del carrito
+    const items = data?.cart_items || [];
+    const total = items.reduce((sum: number, item: any) => {
+        const price = item.products?.price || 0;
+        return sum + (price * item.quantity);
+    }, 0);
+    
+    return { ...data, total };
 };
 
 export const getCartByUserId = async (userId: string) => {
     const { data, error } = await getSupabaseAdmin()
         .from("cart")
-        .select("*, cart_items(*)")
+        .select("*, cart_items(*, products(*))")
         .eq("user_id", userId)
         .single();
     if (error) throw error;
-    return `Carrito ${data} encontrado correctamente`;
+    
+    // Calcular el total del carrito
+    const items = data?.cart_items || [];
+    const total = items.reduce((sum: number, item: any) => {
+        const price = item.products?.price || 0;
+        return sum + (price * item.quantity);
+    }, 0);
+    
+    return { ...data, total };
 };
 
 export const deleteCart = async (cartId: string) => {
@@ -54,7 +70,7 @@ export const addItemToCart = async (itemData: {
         .select()
         .single();
     if (error) throw error;
-    return `Carrito items ${data} obtenidos correctamente`;
+    return data;
 };
 
 export const getCartItems = async (cartId: string) => {
@@ -63,7 +79,7 @@ export const getCartItems = async (cartId: string) => {
         .select("*")
         .eq("cart_id", cartId);
     if (error) throw error;
-    return `Carrito items ${data} obtenidos correctamente`;
+    return data;
 };
 
 export const updateCartItemQuantity = async (itemId: string, quantity: number) => {
@@ -74,7 +90,7 @@ export const updateCartItemQuantity = async (itemId: string, quantity: number) =
         .select()
         .single();
     if (error) throw error;
-    return `Carrito items ${data} actualizados correctamente`;
+    return data;
 };
 
 export const removeItemFromCart = async (itemId: string) => {
