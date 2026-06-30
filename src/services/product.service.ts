@@ -6,7 +6,7 @@ export const getProducts = async () => {
         .from("products")
         .select("*");
     if (error) throw error;
-    return `Lista de productos ${data}`;
+    return `Lista de productos ${data.map((product) => product.name)}`;
 };
 
 export const getProductById = async (productId: string) => {
@@ -23,9 +23,10 @@ export const createProduct = async (productData: TablesInsert<"products">) => {
     const { data, error } = await getSupabaseAdmin()
         .from("products")
         .insert(productData)
-        .select();
+        .select()
+        .single();
     if (error) throw error;
-    return `Producto ${data} creado correctamente`;
+    return data;
 };
 
 export const updateProduct = async (
