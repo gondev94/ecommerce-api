@@ -10,118 +10,248 @@ import {
     getProductByName,
 } from "../services/product.service.js";
 import { getSupabaseAdmin } from "../services/supabase.service.js";
+import { isValidUUID, sanitizeString } from "../middlewares/validation.middleware.js";
 
+/**
+ * SEGURIDAD: 
+ * - GET: Públicas
+ * - POST/PUT/DELETE: Solo admin (configurado en routes)
+ * - Errores sanitizados (no exponer detalles internos)
+ */
 
-// ==================== PRODUCT ====================
+// ==================== PÚBLICAS ====================
 
-export const getProductByNameController = async (req: Request, res: Response) => {
-    const { name } = req.params;
-    if (!name) {
-        return res.status(400).json({ error: "El nombre del producto es requerido" });
-    }
-    try {
-        const product = await getProductByName(name as string);
-        return res.status(200).json({ message: "Producto obtenido correctamente", data: product });
-    } catch (error) {
-        return res.status(500).json({ error: error});
-    }
-}
-
+/**
+ * Obtener todos los productos
+ */
 export const getProductsController = async (_req: Request, res: Response) => {
-    const { data, error } = await getSupabaseAdmin().from("products").select("*");
-    if (error) {
-        return res.status(500).json({ error: error.message });
-    }
-    return res.status(200).json({ message: "Productos obtenidos correctamente", data });
-}
-
-export const getProductByIdController = async (req: Request, res: Response) => { 
-    const { id } = req.params;
-    if (!id) {
-        return res.status(400).json({ error: "El ID del producto es requerido" });
-    }
     try {
-        const product = await getProductById(id as string);
-        return res.status(200).json({ message: "Producto obtenido correctamente", data: product });
-    } catch (error: any) {
-        return res.status(500).json({ error: error.message });
+        const { data, error } = await getSupabaseAdmin()
+            .from("products")
+            .select("*")
+            .order("created_at", { ascending: false });
+            
+        if (error) throw error;
+        
+        return res.status(200).json({ 
+            message: "Productos obtenidos correctamente", 
+            data 
+        });
+    } catch (error) {
+        console.error("Error obteniendo productos:", error);
+        return res.status(500).json({ error: "Error al obtener productos" });
     }
-}
+};
 
-export const createProductController = async (req: Request, res: Response) => {
-    const { name, price, stock, description, imageUrl, category } = req.body;
-    
-    if (!name || !price || !stock || !description || !imageUrl || !category) {
-        return res.status(400).json({ error: "Todos los campos son requeridos" });
-    }
-
+/**
+ * Obtener producto por ID
+ */
+export const getProductByIdController = async (req: Request, res: Response) => {
     try {
-        const existingProduct = await getProductByName(name);
-        if (existingProduct) {
-            return res.status(400).json({ error: "El nombre del producto ya existe" });
+        const id = req.params.id;
+        
+        if (!id || typeof id !== "string" || !isValidUUID(id)) {
+            return res.status(400).json({ error: "ID de producto inválido" });
         }
 
-        const product = await createProduct({ name, price, stock, description, imageUrl, category });
-        return res.status(201).json({ message: "Producto creado correctamente", product });
-    } catch (error: any) {
-        return res.status(500).json({ error: `Error al crear el producto: ${error.message}` });
-    }
-}
+        const { data, error } = await getSupabaseAdmin()
+            .from("products")
+            .select("*")
+            .eq("id", id)
+            .single();
 
-export const updateProductController = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { name, price, stock, description, imageUrl, category } = req.body;
-    if (!name || !price || !stock || !description || !imageUrl || !category) {
-        return res.status(400).json({ error: "Todos los campos son requeridos" });
-    }
-    try {
-        const product = await updateProduct(id as string, { name, price, stock, description, imageUrl, category });
-        return res.status(200).json({ message: "Producto actualizado correctamente", data: product})
+        if (error) {
+            if (error.code === "PGRST116") {
+                return res.status(404).json({ error: "Producto no encontrado" });
+            }
+            throw error;
+        }
+
+        return res.status(200).json({ 
+            message: "Producto obtenido correctamente", 
+            data 
+        });
     } catch (error) {
-        return res.status(500).json({ error: `Error al actualizar el producto: ${(error as Error).message}` });
+        console.error("Error obteniendo producto:", error);
+        return res.status(500).json({ error: "Error al obtener el producto" });
     }
-}
+};
 
-export const deleteProductController = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    if (!id) {
-        return res.status(400).json({ error: "El ID del producto es requerido" });
-    }
-    try {
-        const product = await deleteProduct(id as string);
-        return res.status(200).json({ message: "Producto eliminado correctamente", data: product });
-    } catch (error) {
-        return res.status(500).json({ error: `Error al eliminar el producto: ${(error as Error).message}` });
-    }
-}
-
+/**
+ * Obtener productos por categoría
+ */
 export const getProductsByCategoryController = async (req: Request, res: Response) => {
-    const { category } = req.params;
-    if (!category) {
-        return res.status(400).json({ error: "La categoría es requerida" });
-    }
     try {
-        const products = await getProductsByCategory(category as string);
-        return res.status(200).json({ message: "Productos obtenidos correctamente", data: products });
-    } catch (error) {
-        return res.status(500).json({ error: `Error al obtener los productos por categoría: ${(error as Error).message}` });
-    }
-}
+        const category: string = req.params.category as string;
+        
+        if (!category) {
+            return res.status(400).json({ error: "La categoría es requerida" });
+        }
 
-export const getProductsByPriceLowToHighController = async (req: Request, res: Response) => { 
+        const sanitizedCategory = sanitizeString(category);
+        const products = await getProductsByCategory(sanitizedCategory);
+        
+        return res.status(200).json({ 
+            message: "Productos obtenidos correctamente", 
+            data: products 
+        });
+    } catch (error) {
+        console.error("Error obteniendo productos por categoría:", error);
+        return res.status(500).json({ error: "Error al obtener productos" });
+    }
+};
+
+/**
+ * Obtener productos ordenados por precio (menor a mayor)
+ */
+export const getProductsByPriceLowToHighController = async (_req: Request, res: Response) => {
     try {
         const products = await getProductsByPriceLowToHigh();
-        return res.status(200).json({ message: "Productos obtenidos correctamente", data: products });
+        return res.status(200).json({ 
+            message: "Productos obtenidos correctamente", 
+            data: products 
+        });
     } catch (error) {
-        return res.status(500).json({ error: `Error al obtener los productos por precio de menor a mayor: ${(error as Error).message}` });
+        console.error("Error obteniendo productos:", error);
+        return res.status(500).json({ error: "Error al obtener productos" });
     }
-}
+};
 
-export const getProductsByPriceHighToLowController = async (req: Request, res: Response) => {
+/**
+ * Obtener productos ordenados por precio (mayor a menor)
+ */
+export const getProductsByPriceHighToLowController = async (_req: Request, res: Response) => {
     try {
         const products = await getProductsByPriceHighToLow();
-        return res.status(200).json({ message: "Productos obtenidos correctamente", data: products });
+        return res.status(200).json({ 
+            message: "Productos obtenidos correctamente", 
+            data: products 
+        });
     } catch (error) {
-        return res.status(500).json({ error: `Error al obtener los productos por precio de mayor a menor: ${(error as Error).message}` });
+        console.error("Error obteniendo productos:", error);
+        return res.status(500).json({ error: "Error al obtener productos" });
     }
-}
+};
+
+// ==================== PROTEGIDAS (Admin) ====================
+
+/**
+ * Crear producto (solo admin)
+ */
+export const createProductController = async (req: Request, res: Response) => {
+    try {
+        const { name, price, stock, description, imageUrl, category } = req.body;
+
+        // El middleware validateProductData ya validó, pero double-check
+        if (!name || price === undefined) {
+            return res.status(400).json({ error: "Nombre y precio son requeridos" });
+        }
+
+        // Verificar si ya existe un producto con ese nombre
+        const existingProduct = await getProductByName(name);
+        if (existingProduct) {
+            return res.status(409).json({ error: "Ya existe un producto con ese nombre" });
+        }
+
+        const product = await createProduct({ 
+            name, 
+            price, 
+            stock: stock || 0, 
+            description, 
+            imageUrl, 
+            category 
+        });
+
+        return res.status(201).json({ 
+            message: "Producto creado correctamente", 
+            data: product 
+        });
+    } catch (error) {
+        console.error("Error creando producto:", error);
+        return res.status(500).json({ error: "Error al crear el producto" });
+    }
+};
+
+/**
+ * Actualizar producto (solo admin)
+ */
+export const updateProductController = async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id;
+        const { name, price, stock, description, imageUrl, category } = req.body;
+
+        if (!id || typeof id !== "string" || !isValidUUID(id)) {
+            return res.status(400).json({ error: "ID de producto inválido" });
+        }
+
+        const product = await updateProduct(id, { 
+            name, 
+            price, 
+            stock, 
+            description, 
+            imageUrl, 
+            category 
+        });
+
+        return res.status(200).json({ 
+            message: "Producto actualizado correctamente", 
+            data: product 
+        });
+    } catch (error: unknown) {
+        const err = error as { code?: string };
+        if (err.code === "PGRST116") {
+            return res.status(404).json({ error: "Producto no encontrado" });
+        }
+        console.error("Error actualizando producto:", error);
+        return res.status(500).json({ error: "Error al actualizar el producto" });
+    }
+};
+
+/**
+ * Eliminar producto (solo admin)
+ */
+export const deleteProductController = async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id;
+
+        if (!id || typeof id !== "string" || !isValidUUID(id)) {
+            return res.status(400).json({ error: "ID de producto inválido" });
+        }
+
+        await deleteProduct(id);
+
+        return res.status(200).json({ 
+            message: "Producto eliminado correctamente" 
+        });
+    } catch (error) {
+        console.error("Error eliminando producto:", error);
+        return res.status(500).json({ error: "Error al eliminar el producto" });
+    }
+};
+
+/**
+ * Obtener producto por nombre (interno)
+ */
+export const getProductByNameController = async (req: Request, res: Response) => {
+    try {
+        const { name } = req.params as { name: string };
+        
+        if (!name) {
+            return res.status(400).json({ error: "El nombre del producto es requerido" });
+        }
+
+        const product = await getProductByName(sanitizeString(name));
+        
+        if (!product) {
+            return res.status(404).json({ error: "Producto no encontrado" });
+        }
+
+        return res.status(200).json({ 
+            message: "Producto obtenido correctamente", 
+            data: product 
+        });
+    } catch (error) {
+        console.error("Error obteniendo producto:", error);
+        return res.status(500).json({ error: "Error al obtener el producto" });
+    }
+};

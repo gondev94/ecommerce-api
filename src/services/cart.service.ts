@@ -1,11 +1,13 @@
 import { getSupabaseAdmin } from "./supabase.service.js";
+import type { TablesInsert, TablesUpdate } from "../types/database.types.js";
 
 // ==================== CART ====================
 
 export const createCart = async (userId: string) => {
+    const cartData: TablesInsert<"cart"> = { user_id: userId };
     const { data, error } = await getSupabaseAdmin()
         .from("cart")
-        .insert({ user_id: userId })
+        .insert(cartData)
         .select()
         .single();
     if (error) throw error;
@@ -59,11 +61,7 @@ export const deleteCart = async (cartId: string) => {
 
 // ==================== CART ITEMS ====================
 
-export const addItemToCart = async (itemData: {
-    cart_id: string;
-    product_id: string;
-    quantity: number;
-}) => {
+export const addItemToCart = async (itemData: TablesInsert<"cart_items">) => {
     const { data, error } = await getSupabaseAdmin()
         .from("cart_items")
         .insert(itemData)
@@ -83,9 +81,10 @@ export const getCartItems = async (cartId: string) => {
 };
 
 export const updateCartItemQuantity = async (itemId: string, quantity: number) => {
+    const updateData: TablesUpdate<"cart_items"> = { quantity };
     const { data, error } = await getSupabaseAdmin()
         .from("cart_items")
-        .update({ quantity })
+        .update(updateData)
         .eq("id", itemId)
         .select()
         .single();
